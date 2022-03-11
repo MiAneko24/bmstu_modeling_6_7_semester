@@ -11,9 +11,9 @@ import javax.swing.*
 import org.math.plot.Plot2DPanel
 import java.awt.Color
 
-val output_step = 1
+val output_step = 1000
 
-fun picarFirstApprox(x : Double, y0 : Double) : Double = y0 + x.pow(3) / 3 + y0 * y0
+fun picarFirstApprox(x : Double, y0 : Double) : Double = y0 + x.pow(3) / 3 + y0 * y0 * x
 
 fun picarSecondApprox(x : Double, y0 : Double) : Double = y0 + x.pow(3) / 3 + x.pow(7) / 63
 
@@ -28,12 +28,10 @@ fun picarFourthApprox(x : Double, y0 : Double) : Double = y0 + x.pow(3) / 3 + x.
 fun picardSolver(x0 : Double, y0 : Double, h : Double, n : Int) : MutableList<MutableList<Double>> {
     val resList : MutableList<MutableList<Double>> = mutableListOf()
     var x = x0
-    var cnt = 0
     for (i in 0..n) {
-        if (cnt % output_step == 0)
+        if (i % output_step == 0)
             resList.add(mutableListOf(x, picarFirstApprox(x, y0), picarSecondApprox(x, y0), picarThirdApprox(x, y0), picarFourthApprox(x, y0)))
         x += h
-        cnt++
     }
     return resList
 }
@@ -46,13 +44,11 @@ fun eulerSolver (x0: Double, y0 : Double, h : Double, n : Int) : MutableList<Dou
 
     var x = x0
     var y = y0
-    var cnt = 0
     for (i in 0..n) {
-        if (cnt % output_step == 0)
+        if (i % output_step == 0)
             resList.add(y)
         y += h * f(x, y)
         x += h
-        cnt++
     }
     return resList
 }
@@ -61,13 +57,11 @@ fun rungeKuttSolver(x0 : Double, y0 : Double, alpha : Double, h : Double, n : In
     val resList : MutableList<Double> = mutableListOf()
     var x = x0
     var y = y0
-    var cnt = 0
     for (i in 0..n) {
-        if (cnt % output_step == 0)
+        if (i % output_step == 0)
             resList.add(y)
         y += h * ((1 - alpha) * f(x, y) + alpha * f(x + h / (2 * alpha), y + h / (2 * alpha) * f(x, y)))
         x += h
-        cnt++
     }
     return resList
 }
@@ -92,7 +86,7 @@ fun main() {
     val xStart = 0.0
     val xEnd = 2.0
     val y0 = 0.0
-    val h = 10e-3
+    val h = 10e-5
 
     val n : Int = ceil(abs(xEnd - xStart) / h).toInt()
 
@@ -126,18 +120,18 @@ fun main() {
 
     neuler.addAll(euler)
     nrunge.addAll(runge)
-    print("xl = ${xgraph.size}, gp[i]l = ${gpic[0].size}, el = ${neuler.size}, rl = ${nrunge.size}")
+
     val plot = Plot2DPanel()
     plot.addLinePlot("Picar 1st approx", Color.CYAN, xgraph.toDoubleArray(), gpic[0].toDoubleArray())
     plot.addLinePlot("Picar 2nd approx", Color.GREEN, xgraph.toDoubleArray(), gpic[1].toDoubleArray())
-    plot.addLinePlot("picar 3rd approx", Color.ORANGE, xgraph.toDoubleArray(), gpic[2].toDoubleArray())
+    plot.addLinePlot("Picar 3rd approx", Color.ORANGE, xgraph.toDoubleArray(), gpic[2].toDoubleArray())
     plot.addLinePlot("Picar 4th approx", Color.MAGENTA, xgraph.toDoubleArray(), gpic[3].toDoubleArray())
     plot.addLinePlot("Euler", Color.RED, xgraph.toDoubleArray(), neuler.toDoubleArray())
     plot.addLinePlot("Runge-Kutt", Color.YELLOW, xgraph.toDoubleArray(), nrunge.toDoubleArray())
     val frame = JFrame()
     plot.addLegend("SOUTH")
 
-    frame.setSize(600, 600)
+    frame.setSize(1000, 1000)
     frame.contentPane = plot
     frame.isVisible = true
 
